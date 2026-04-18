@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan R</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════════
+   DESIGN TOKENS  —  light, clean, legible
+══════════════════════════════════════════════════════════ */
+:root{
+  /* surfaces */
+  --bg:      #f4f6f9;
+  --s1:      #ffffff;   /* panel / card */
+  --s2:      #f8f9fc;   /* header stripe */
+  --s3:      #eef1f7;   /* input / hover */
+  --s4:      #e4e8f2;   /* subtle hover */
+
+  /* borders */
+  --b0: rgba(60,80,140,.07);
+  --b1: rgba(60,80,140,.13);
+  --b2: rgba(60,80,140,.22);
+
+  /* text */
+  --t1:#1a2140;   /* primary */
+  --t2:#4a5578;   /* secondary */
+  --t3:#8892b0;   /* muted */
+
+  /* accent colours */
+  --blue:   #3b6fd4;
+  --blue-d: rgba(59,111,212,.09);
+  --blue-h: #2d5abf;
+
+  --green:  #0e9e6e;
+  --green-d:rgba(14,158,110,.10);
+
+  --amber:  #c07a10;
+  --amber-d:rgba(192,122,16,.10);
+
+  --red:    #d63a3a;
+  --red-d:  rgba(214,58,58,.09);
+
+  --purple: #7c3aed;
+  --purple-d:rgba(124,58,237,.09);
+
+  --cyan:   #0891b2;
+  --cyan-d: rgba(8,145,178,.09);
+
+  --r:8px; --rl:12px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;line-height:1.55;-webkit-font-smoothing:antialiased}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--t3)}
+
+/* ── layout ── */
+.shell{max-width:1100px;margin:0 auto;padding:2rem 1.5rem 5rem;position:relative}
+/* watermark pattern */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(var(--b0) 1px,transparent 1px);background-size:24px 24px;z-index:0}
+.shell{position:relative;z-index:1}
+
+.page{display:none;animation:fadeUp .28s ease both}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── HEADER ── */
+.app-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.9rem 1.4rem;margin-bottom:1.75rem;
+  background:var(--s1);border:1px solid var(--b1);
+  border-radius:var(--rl);box-shadow:0 1px 4px rgba(60,80,140,.07);
+}
+.logo{display:flex;align-items:center;gap:.75rem}
+.logo-mark{
+  width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(135deg,#2d5abf 0%,#3b6fd4 100%);
+  display:grid;place-items:center;color:#fff;flex-shrink:0;
+  box-shadow:0 2px 10px rgba(59,111,212,.30);
+}
+.logo-name{font-size:1.15rem;font-weight:700;letter-spacing:-.03em;color:var(--t1)}
+.logo-tag{font-size:.68rem;color:var(--t3);font-weight:500;letter-spacing:.07em;text-transform:uppercase;margin-top:1px}
+
+/* ── STEPS ── */
+.steps{display:flex;align-items:center;gap:.4rem;margin-bottom:2rem;padding:0 .2rem}
+.step{display:flex;align-items:center;gap:.45rem;font-size:.8rem;font-weight:600;color:var(--t3);cursor:pointer;padding:.2rem .05rem;transition:color .2s;user-select:none}
+.step.active{color:var(--blue)}
+.step.done{color:var(--green)}
+.step-num{
+  width:24px;height:24px;border-radius:50%;border:2px solid currentColor;
+  display:grid;place-items:center;font-size:.65rem;font-weight:700;
+  font-family:'DM Mono',monospace;flex-shrink:0;transition:all .25s;
+}
+.step.active .step-num{background:var(--blue-d);border-color:var(--blue);color:var(--blue)}
+.step.done  .step-num{background:var(--green-d);border-color:var(--green);color:var(--green)}
+.step-sep{flex:1;height:2px;background:var(--b1);max-width:60px;border-radius:2px}
+
+/* ── PANEL ── */
+.panel{
+  background:var(--s1);border:1px solid var(--b1);
+  border-radius:var(--rl);overflow:hidden;margin-bottom:1.1rem;
+  box-shadow:0 1px 6px rgba(60,80,140,.06);
+}
+.ph{/* panel header */
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.85rem 1.3rem;border-bottom:1px solid var(--b0);
+  background:var(--s2);
+}
+.ph-title{
+  display:flex;align-items:center;gap:.5rem;
+  font-size:.72rem;font-weight:700;color:var(--t2);
+  letter-spacing:.07em;text-transform:uppercase;
+}
+.ph-title svg{color:var(--blue);width:13px;height:13px;flex-shrink:0}
+.pb{padding:1.3rem}   /* panel body */
+
+.page-foot{display:flex;justify-content:space-between;align-items:center;margin-top:1.4rem}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:.52rem 1rem;border:none;border-radius:var(--r);
+  font-weight:600;font-family:'DM Sans',sans-serif;font-size:.83rem;
+  cursor:pointer;transition:all .14s;white-space:nowrap;letter-spacing:-.01em;
+}
+.btn svg{width:14px;height:14px;flex-shrink:0}
+.btn:disabled{opacity:.38;cursor:not-allowed;pointer-events:none}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 1px 4px rgba(59,111,212,.25)}
+.btn-primary:hover{background:var(--blue-h);transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,111,212,.35)}
+.btn-ghost{background:var(--s3);color:var(--t2);border:1px solid var(--b1)}
+.btn-ghost:hover{background:var(--s4);color:var(--t1)}
+.btn-danger{background:rgba(214,58,58,.08);color:var(--red);border:1px solid rgba(214,58,58,.22)}
+.btn-danger:hover{background:rgba(214,58,58,.15)}
+.btn-green{background:var(--green-d);color:var(--green);border:1px solid rgba(14,158,110,.25)}
+.btn-green:hover{background:rgba(14,158,110,.17)}
+.btn-lg{padding:.65rem 1.35rem;font-size:.88rem}
+
+/* ── DROPZONE ── */
+.dropzone{
+  border:2px dashed var(--b2);border-radius:var(--r);
+  padding:2.2rem 1.5rem;text-align:center;cursor:pointer;
+  position:relative;transition:all .2s;background:var(--s2);
+}
+.dropzone:hover,.dropzone.dragover{border-color:var(--blue);background:var(--blue-d)}
+.dropzone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.dz-icon{width:38px;height:38px;color:var(--blue);margin:0 auto .6rem;display:block}
+.dropzone p{color:var(--t2);margin:0;font-size:.88rem}
+.dropzone strong{color:var(--t1)}
+.dropzone small{color:var(--t3);font-size:.72rem;margin-top:.3rem;display:block;font-family:'DM Mono',monospace}
+
+/* ── FILE CHIPS ── */
+.file-chips{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:1rem}
+.chip{
+  display:inline-flex;align-items:center;gap:.35rem;
+  padding:.3rem .7rem;border-radius:100px;font-size:.7rem;font-weight:600;
+  font-family:'DM Mono',monospace;border:1px solid var(--b1);
+  color:var(--t3);background:var(--s3);transition:all .25s;
+}
+.chip svg{width:11px;height:11px}
+.chip.ok{color:var(--green);background:var(--green-d);border-color:rgba(14,158,110,.3)}
+
+/* ── DAYS ── */
+.days-row{display:flex;gap:.45rem;flex-wrap:wrap}
+.day-pill input{position:absolute;opacity:0;width:0;height:0}
+.day-pill{position:relative}
+.day-lbl{
+  display:flex;align-items:center;gap:.35rem;
+  padding:.38rem .9rem;border-radius:100px;font-size:.8rem;font-weight:600;
+  cursor:pointer;border:1.5px solid var(--b1);color:var(--t2);
+  background:var(--s2);transition:all .14s;user-select:none;
+}
+.day-pill input:checked+.day-lbl{background:var(--blue-d);border-color:var(--blue);color:var(--blue)}
+.day-lbl:hover{border-color:var(--b2);color:var(--t1)}
+
+/* ── DATE INPUT ── */
+.date-row{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.8rem}
+.date-pair{display:flex;flex-direction:column;gap:.25rem}
+.date-pair label{font-size:.7rem;font-weight:600;color:var(--t3);letter-spacing:.05em;text-transform:uppercase}
+.date-inp{
+  padding:.42rem .7rem;background:var(--s3);border:1px solid var(--b1);
+  border-radius:var(--r);color:var(--t1);font-family:'DM Sans',sans-serif;font-size:.82rem;
+  cursor:pointer;transition:border-color .14s;
+}
+.date-inp:focus{outline:none;border-color:var(--blue)}
+.date-inp::-webkit-calendar-picker-indicator{filter:none;opacity:.6}
+
+/* ── MULTI-SELECT ── */
+.cb{background:var(--blue-d);color:var(--blue);border:1px solid rgba(59,111,212,.25);border-radius:100px;padding:1px 8px;font-size:.62rem;font-family:'DM Mono',monospace;font-weight:600}
+.multi-box{background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--r);overflow:hidden}
+.multi-box.related-box{border-color:rgba(14,158,110,.3);background:rgba(14,158,110,.03)}
+.multi-sub-label{
+  font-size:.68rem;font-weight:700;color:var(--t2);
+  letter-spacing:.07em;text-transform:uppercase;
+  padding:.5rem .7rem .3rem;display:flex;align-items:center;gap:.4rem;
+}
+.multi-sub-label.other{color:var(--t3);border-top:1px solid var(--b0);margin-top:.1rem}
+.multi-sub-label svg{width:11px;height:11px}
+.sinp{
+  width:100%;padding:.52rem .7rem;background:transparent;border:none;
+  border-bottom:1px solid var(--b0);color:var(--t1);
+  font-family:'DM Sans',sans-serif;font-size:.82rem;
+}
+.sinp::placeholder{color:var(--t3)}
+.sinp:focus{outline:none;background:rgba(59,111,212,.04)}
+.lbox{max-height:160px;overflow-y:auto;padding:.25rem}
+.lbox.tall{max-height:200px}
+.li{
+  display:flex;align-items:center;gap:.4rem;
+  padding:.36rem .4rem;border-radius:6px;cursor:pointer;
+  font-size:.82rem;transition:background .1s;color:var(--t2);
+}
+.li:hover{background:var(--s3);color:var(--t1)}
+.li input[type="checkbox"]{accent-color:var(--blue);width:13px;height:13px;flex-shrink:0}
+.li label{cursor:pointer;flex:1}
+.form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem}
+.field-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem}
+.field-lbl{font-size:.72rem;font-weight:700;color:var(--t3);letter-spacing:.07em;text-transform:uppercase}
+
+/* ── RESULTS TOPBAR ── */
+.rtop{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:.7rem;padding:.9rem 1.3rem;
+  background:var(--s2);border-bottom:1px solid var(--b1);
+}
+.stats-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.stat{display:flex;align-items:baseline;gap:.28rem}
+.sn{font-size:1.2rem;font-weight:700;font-family:'DM Mono',monospace;line-height:1}
+.sl{font-size:.66rem;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.sdiv{width:1px;height:18px;background:var(--b1)}
+.sn.blue{color:var(--blue)} .sn.green{color:var(--green)}
+.sn.amber{color:var(--amber)} .sn.red{color:var(--red)} .sn.purple{color:var(--purple)}
+
+/* progress */
+.prog-row{display:flex;align-items:center;gap:.65rem;padding:.6rem 1.3rem;border-bottom:1px solid var(--b0)}
+.pt{flex:1;height:4px;background:var(--s4);border-radius:2px;overflow:hidden}
+.pf{height:100%;background:var(--green);border-radius:2px;transition:width .4s ease;width:0}
+.pl{font-size:.68rem;font-family:'DM Mono',monospace;color:var(--t3);white-space:nowrap}
+
+/* ── RESULTS BODY ── */
+.rbody{padding:.9rem 1.3rem 1.3rem}
+
+/* Time-slot group */
+.time-group{margin-bottom:1.6rem}
+.time-header{
+  display:flex;align-items:center;gap:.7rem;
+  padding:.55rem .9rem;
+  background:linear-gradient(90deg,var(--s3) 0%,var(--s2) 100%);
+  border:1px solid var(--b1);
+  border-radius:var(--r);margin-bottom:.6rem;
+}
+.time-header-time{
+  font-family:'DM Mono',monospace;font-size:.95rem;font-weight:700;
+  color:var(--amber);letter-spacing:.02em;
+}
+.time-header-count{font-size:.7rem;color:var(--t3);font-weight:500;}
+.time-header-day{
+  margin-left:auto;font-size:.7rem;font-weight:700;
+  color:var(--blue);letter-spacing:.06em;text-transform:uppercase;
+  background:var(--blue-d);border:1px solid rgba(59,111,212,.2);
+  border-radius:100px;padding:2px 9px;
+}
+
+/* ── CARD ── */
+.rcard{
+  background:var(--s1);border:1.5px solid var(--b1);
+  border-radius:var(--r);padding:.85rem 1rem .85rem 1.1rem;
+  margin-bottom:.5rem;
+  display:grid;grid-template-columns:1fr minmax(260px,300px);
+  gap:.9rem;align-items:start;
+  animation:cardIn .25s ease both;
+  transition:border-color .15s,box-shadow .15s;
+  position:relative;
+  box-shadow:0 1px 3px rgba(60,80,140,.05);
+}
+.rcard::after{
+  content:'';position:absolute;left:0;top:8px;bottom:8px;
+  width:3px;border-radius:0 2px 2px 0;
+  background:var(--b1);transition:background .2s;
+}
+.rcard.slot-mid::after{background:var(--blue)}
+.rcard.slot-edge::after{background:var(--amber)}
+.rcard:hover{border-color:var(--b2);box-shadow:0 2px 8px rgba(60,80,140,.10)}
+.rcard.nosub-on{background:rgba(214,58,58,.03);border-color:rgba(214,58,58,.22)}
+.rcard.nosub-on::after{background:var(--red)}
+.rcard.dismiss-on{background:rgba(124,58,237,.03);border-color:rgba(124,58,237,.22)}
+.rcard.dismiss-on::after{background:var(--purple)}
+
+/* consecutive badge */
+.consec-badge{
+  font-size:.62rem;font-weight:600;color:var(--cyan);
+  background:var(--cyan-d);border:1px solid rgba(8,145,178,.22);
+  border-radius:4px;padding:1px 6px;display:inline-flex;align-items:center;gap:.22rem;
+}
+.consec-badge svg{width:9px;height:9px}
+
+@keyframes cardIn{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:none}}
+
+.cl{min-width:0}
+.ctitle{
+  font-size:.88rem;font-weight:600;color:var(--t1);
+  margin-bottom:.28rem;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;
+}
+.subj{color:var(--blue);font-weight:700}
+.abadge{
+  font-size:.61rem;font-weight:700;letter-spacing:.06em;color:var(--red);
+  background:var(--red-d);border:1px solid rgba(214,58,58,.22);
+  border-radius:4px;padding:1px 5px;text-transform:uppercase;
+}
+.ebadge{
+  font-size:.61rem;font-weight:700;letter-spacing:.05em;color:var(--amber);
+  background:var(--amber-d);border:1px solid rgba(192,122,16,.22);
+  border-radius:4px;padding:1px 6px;display:inline-flex;align-items:center;gap:.22rem;
+}
+.ebadge svg{width:9px;height:9px}
+.cmeta{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;font-size:.72rem;margin-top:.22rem}
+.mb{
+  display:inline-flex;align-items:center;gap:.22rem;
+  padding:2px 7px;border-radius:4px;
+  font-family:'DM Mono',monospace;font-weight:500;
+}
+.mb svg{width:9px;height:9px;opacity:.65}
+.mb-time{background:var(--amber-d);color:var(--amber);border:1px solid rgba(192,122,16,.18)}
+.mb-class{background:var(--s3);color:var(--t2);border:1px solid var(--b1)}
+.mb-room{background:var(--s3);color:var(--t3);border:1px solid var(--b0)}
+
+.cr{display:flex;flex-direction:column;gap:.4rem}
+.sw{position:relative}
+.tsel{
+  width:100%;padding:.46rem 1.9rem .46rem .65rem;
+  background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--r);
+  color:var(--t1);font-family:'DM Sans',sans-serif;font-size:.8rem;
+  cursor:pointer;appearance:none;transition:border-color .14s;
+}
+.tsel:focus{outline:none;border-color:var(--blue);background:var(--s3)}
+.tsel option{background:var(--s1);color:var(--t1)}
+.tsel.assigned{border-color:var(--green);color:var(--green);background:var(--green-d)}
+.sarr{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--t3)}
+
+.actions{display:flex;flex-direction:column;gap:.3rem}
+.arow{display:flex;align-items:center;gap:.45rem;font-size:.76rem;color:var(--t3)}
+.achk{width:13px;height:13px;cursor:pointer;flex-shrink:0}
+.achk.p{accent-color:var(--purple)}
+.achk.r{accent-color:var(--red)}
+.albl{cursor:pointer;user-select:none;transition:color .13s;flex:1}
+.albl.p:hover{color:var(--purple)}
+.albl.r:hover{color:var(--red)}
+
+/* empty state */
+.empty{text-align:center;padding:3rem 1rem;color:var(--t3)}
+.empty svg{width:32px;height:32px;margin:0 auto .65rem;display:block;opacity:.25}
+.empty p{font-size:.82rem}
+
+/* legend */
+.legend{
+  display:flex;gap:1.2rem;flex-wrap:wrap;
+  padding:.55rem 1.3rem;border-bottom:1px solid var(--b0);
+  font-size:.71rem;color:var(--t3);
+}
+.leg-item{display:flex;align-items:center;gap:.35rem}
+.leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+
+.hidden{display:none!important}
+
+/* ── GROUPS PANEL (nouvelle fonctionnalité) ── */
+.groups-panel{
+  background:var(--s1);border:1.5px solid rgba(59,111,212,.3);
+  border-radius:var(--rl);overflow:hidden;margin-bottom:1.1rem;
+  box-shadow:0 2px 10px rgba(59,111,212,.08);
+  animation:fadeUp .28s ease both;
+}
+.groups-panel-header{
+  display:flex;align-items:center;gap:.6rem;
+  padding:.85rem 1.3rem;
+  background:linear-gradient(90deg,rgba(59,111,212,.07) 0%,transparent 100%);
+  border-bottom:1px solid rgba(59,111,212,.15);
+}
+.groups-panel-title{
+  font-size:.72rem;font-weight:700;color:var(--blue);
+  letter-spacing:.07em;text-transform:uppercase;
+  display:flex;align-items:center;gap:.45rem;flex:1;
+}
+.groups-panel-title svg{width:13px;height:13px}
+.groups-info{font-size:.76rem;color:var(--t3)}
+.groups-body{padding:1.1rem 1.3rem}
+.groups-mode-row{
+  display:flex;gap:.6rem;margin-bottom:1rem;
+}
+.mode-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:.45rem;
+  padding:.6rem 1rem;border-radius:var(--r);font-size:.82rem;font-weight:600;
+  cursor:pointer;border:2px solid var(--b1);background:var(--s2);color:var(--t2);
+  transition:all .16s;user-select:none;
+}
+.mode-btn.active{border-color:var(--blue);background:var(--blue-d);color:var(--blue)}
+.mode-btn svg{width:14px;height:14px;flex-shrink:0}
+.groups-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:.5rem;
+}
+.group-item{
+  display:flex;align-items:center;gap:.5rem;
+  padding:.5rem .7rem;border-radius:var(--r);
+  border:1.5px solid var(--b1);background:var(--s2);
+  cursor:pointer;transition:all .14s;font-size:.82rem;color:var(--t2);
+}
+.group-item:hover{border-color:var(--b2);background:var(--s3);color:var(--t1)}
+.group-item.selected{border-color:var(--blue);background:var(--blue-d);color:var(--blue)}
+.group-item input[type="checkbox"]{accent-color:var(--blue);width:13px;height:13px;flex-shrink:0}
+.group-item-name{flex:1;font-weight:500}
+.group-item-classes{font-size:.68rem;color:var(--t3);font-family:'DM Mono',monospace}
+.group-item.selected .group-item-classes{color:rgba(59,111,212,.6)}
+.groups-hint{
+  margin-top:.75rem;padding:.6rem .9rem;border-radius:6px;
+  background:var(--blue-d);border:1px solid rgba(59,111,212,.18);
+  font-size:.74rem;color:var(--t2);
+  display:flex;align-items:flex-start;gap:.45rem;
+}
+.groups-hint svg{width:13px;height:13px;color:var(--blue);flex-shrink:0;margin-top:1px}
+
+/* ══════════════════════════════════════════
+   PRINT
+══════════════════════════════════════════ */
+.print-section{display:none}
+@media print{
+  *{background:transparent!important;color:#000!important;box-shadow:none!important;text-shadow:none!important}
+  body{background:#fff!important;color:#000!important}
+  .shell{padding:0;max-width:100%}
+  .app-header,.steps,.page-foot,.rtop,.prog-row,.rbody,
+  .legend,.btn,.rcard,.time-group,.time-header{display:none!important}
+  .panel{border:none;margin:0}
+  .ph{background:#fff!important;border-bottom:2px solid #000!important;padding:.6rem 0}
+  .ph-title{color:#000!important;font-size:11pt;font-weight:700;letter-spacing:0;text-transform:none}
+  .print-section{display:block!important;padding:0}
+  .print-meta{font-size:9pt;color:#333!important;margin-bottom:.6rem}
+  .ptable{width:100%;border-collapse:collapse;font-size:9pt;color:#000!important;margin-top:.3rem}
+  .ptable th,.ptable td{border:1px solid #000!important;padding:5px 8px;text-align:left;vertical-align:middle;color:#000!important;background:#fff!important}
+  .ptable th{background:#fff!important;font-weight:700;font-size:8.5pt;border-bottom:2px solid #000!important}
+  .ptable tbody tr:nth-child(even) td{background:#f7f7f7!important}
+  @page{size:landscape;margin:1cm}
+}
+
+@media(max-width:700px){
+  .form-grid2{grid-template-columns:1fr}
+  .rcard{grid-template-columns:1fr}
+  .cr{min-width:0}
+  .stats-row{gap:.6rem}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ══ HEADER ══ -->
+<header class="app-header">
+  <div class="logo">
+    <div class="logo-mark">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+    </div>
+    <div>
+      <div class="logo-name">Plan R</div>
+      <div class="logo-tag">Gestion des remplacements</div>
+    </div>
+  </div>
+  <button id="btn-reset" class="btn btn-danger">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.06"/></svg>
+    Réinitialiser
+  </button>
+</header>
+
+<!-- ══ STEPS ══ -->
+<div class="steps">
+  <div class="step active" id="step-1" data-page="1"><div class="step-num">1</div><span>Import</span></div>
+  <div class="step-sep"></div>
+  <div class="step" id="step-2" data-page="2"><div class="step-num">2</div><span>Configuration</span></div>
+  <div class="step-sep"></div>
+  <div class="step" id="step-3" data-page="3"><div class="step-num">3</div><span>Remplacements</span></div>
+</div>
+
+<!-- ══ PAGE 1 : IMPORT ══ -->
+<div class="page active" id="page-1">
+  <div class="panel">
+    <div class="ph">
+      <div class="ph-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+        Importer les fichiers XML
+      </div>
+    </div>
+    <div class="pb">
+      <div id="dropzone" class="dropzone">
+        <svg class="dz-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <p><strong>Glisser les fichiers ici</strong> ou cliquer pour sélectionner</p>
+        <small>EXP_CLASSE · EXP_COURS · EXP_ELEVE · EXP_GROUPE · EXP_PROFESSEUR</small>
+        <input type="file" id="file-input" multiple accept=".xml">
+      </div>
+      <div class="file-chips" id="upload-status">
+        <span class="chip" id="status-CLASSE"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Classes</span>
+        <span class="chip" id="status-COURS"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Cours</span>
+        <span class="chip" id="status-ELEVE"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Élèves</span>
+        <span class="chip" id="status-GROUPE"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Groupes</span>
+        <span class="chip" id="status-PROF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Professeurs</span>
+      </div>
+      <div class="page-foot">
+        <span id="import-hint" style="font-size:.78rem;color:var(--t3)">Chargez les 5 fichiers pour continuer.</span>
+        <button id="btn-to-step2" class="btn btn-primary btn-lg" disabled>
+          Continuer <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE 2 : CONFIG ══ -->
+<div class="page" id="page-2">
+
+  <!-- Days + Dates -->
+  <div class="panel">
+    <div class="ph">
+      <div class="ph-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Jours &amp; Dates concernés
+      </div>
+    </div>
+    <div class="pb">
+      <div class="days-row" id="days-row">
+        <label class="day-pill"><input type="checkbox" value="lundi"   id="day-lundi"><span class="day-lbl">Lundi</span></label>
+        <label class="day-pill"><input type="checkbox" value="mardi"   id="day-mardi"><span class="day-lbl">Mardi</span></label>
+        <label class="day-pill"><input type="checkbox" value="mercredi" id="day-mercredi"><span class="day-lbl">Mercredi</span></label>
+        <label class="day-pill"><input type="checkbox" value="jeudi"   id="day-jeudi"><span class="day-lbl">Jeudi</span></label>
+        <label class="day-pill"><input type="checkbox" value="vendredi" id="day-vendredi"><span class="day-lbl">Vendredi</span></label>
+      </div>
+      <div class="date-row" id="date-row" style="margin-top:1rem"></div>
+    </div>
+  </div>
+
+  <!-- Classes en voyage -->
+  <div class="panel">
+    <div class="ph">
+      <div class="ph-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Classes en voyage
+      </div>
+      <span class="cb" id="classes-count">0</span>
+    </div>
+    <div class="pb">
+      <div class="multi-box">
+        <input type="text" class="sinp" id="classes-search" placeholder="Rechercher une classe…">
+        <div class="lbox tall" id="classes-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Périmètre : groupes liés aux classes (apparaît après sélection de classe) -->
+  <div id="groups-panel" class="groups-panel hidden">
+    <div class="groups-panel-header">
+      <div class="groups-panel-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        Périmètre de l'absence
+      </div>
+      <span class="groups-info" id="groups-info-text"></span>
+    </div>
+    <div class="groups-body">
+      <div class="groups-mode-row">
+        <div class="mode-btn active" id="mode-full" onclick="setGroupMode('full')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Classes complètes
+        </div>
+        <div class="mode-btn" id="mode-groups" onclick="setGroupMode('groups')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Groupes spécifiques
+        </div>
+      </div>
+      <div id="groups-grid" class="groups-grid hidden"></div>
+      <div class="groups-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="groups-hint-text">Toute la classe est concernée par l'absence. Choisissez « Groupes spécifiques » pour limiter à certains groupes.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Professeurs absents — deux zones -->
+  <div class="panel">
+    <div class="ph">
+      <div class="ph-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Professeurs absents
+      </div>
+      <span class="cb" id="teachers-count">0</span>
+    </div>
+    <div class="pb" style="padding-top:.8rem">
+      <input type="text" class="sinp" id="teachers-search" placeholder="Rechercher un professeur…" style="width:100%;border:1px solid var(--b1);border-radius:var(--r);margin-bottom:.7rem">
+
+      <!-- Zone 1: profs liés aux classes sélectionnées -->
+      <div class="multi-box related-box" style="margin-bottom:.7rem">
+        <div class="multi-sub-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          Profs des classes sélectionnées
+          <span class="cb" id="rel-count" style="margin-left:auto">0</span>
+        </div>
+        <div class="lbox" id="teachers-related" style="min-height:36px">
+          <div class="li" style="color:var(--t3);font-size:.75rem;font-style:italic;cursor:default">Sélectionnez d'abord des classes…</div>
+        </div>
+      </div>
+
+      <!-- Zone 2: tous les autres profs -->
+      <div class="multi-box">
+        <div class="multi-sub-label other">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Autres professeurs
+        </div>
+        <div class="lbox" id="teachers-others"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-foot">
+    <button class="btn btn-ghost" onclick="goToPage(1)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      Retour
+    </button>
+    <button id="btn-calculate" class="btn btn-primary btn-lg" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Générer le plan
+    </button>
+  </div>
+</div>
+
+<!-- ══ PAGE 3 : RÉSULTATS ══ -->
+<div class="page" id="page-3">
+  <div class="panel">
+    <div class="ph">
+      <div class="ph-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        Plan de remplacement
+      </div>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+        <button id="btn-print" class="btn btn-ghost">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Imprimer
+        </button>
+        <button id="btn-csv" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Exporter CSV
+        </button>
+      </div>
+    </div>
+
+    <div class="rtop">
+      <div class="stats-row">
+        <div class="stat"><span class="sn blue" id="st-total">0</span><span class="sl">Total</span></div>
+        <div class="sdiv"></div>
+        <div class="stat"><span class="sn green" id="st-assigned">0</span><span class="sl">Assignés</span></div>
+        <div class="sdiv"></div>
+        <div class="stat"><span class="sn amber" id="st-pending">0</span><span class="sl">En attente</span></div>
+        <div class="sdiv"></div>
+        <div class="stat"><span class="sn purple" id="st-dismiss">0</span><span class="sl">Licenciés</span></div>
+        <div class="sdiv"></div>
+        <div class="stat"><span class="sn red" id="st-nosub">0</span><span class="sl">Sans remplaçant</span></div>
+      </div>
+      <button id="btn-autoassign" class="btn btn-green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Auto-assigner
+      </button>
+    </div>
+
+    <div class="prog-row">
+      <div class="pt"><div class="pf" id="prog-fill"></div></div>
+      <span class="pl" id="prog-lbl">0 / 0</span>
+    </div>
+
+    <div class="legend">
+      <span class="leg-item"><span class="leg-dot" style="background:var(--blue)"></span>Cours en milieu de journée — remplaçant prioritaire</span>
+      <span class="leg-item"><span class="leg-dot" style="background:var(--amber)"></span>Premier / dernier cours — licenciement suggéré</span>
+      <span class="leg-item"><span class="leg-dot" style="background:var(--cyan)"></span>Cours consécutifs du même prof</span>
+    </div>
+
+    <div class="rbody" id="results-content"></div>
+    <div class="print-section" id="print-section"></div>
+  </div>
+
+  <div class="page-foot">
+    <button class="btn btn-ghost" onclick="goToPage(2)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      Modifier la configuration
+    </button>
+  </div>
+</div>
+
+</div><!-- /shell -->
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   XML PARSER
+═══════════════════════════════════════════════════════════ */
+class XMLParser {
+  static async parseFile(file, type) {
+    return new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=e=>{try{res(this.extractData(new DOMParser().parseFromString(e.target.result,'text/xml'),type));}catch(err){rej(err);}};
+      r.onerror=()=>rej(new Error('Erreur lecture'));
+      r.readAsText(file);
+    });
+  }
+  static val(n,tag){const e=n.getElementsByTagName(tag);return e.length?e[0].textContent.trim():null;}
+  static extractData(doc,type){
+    const R=[];
+    switch(type){
+      case 'CLASSE':
+        doc.querySelectorAll('Classes').forEach(n=>{const nom=this.val(n,'NOM');if(nom&&nom.trim().length>=3)R.push({id:this.val(n,'NUMERO'),nom});});break;
+      case 'COURS':{
+        const raw=[],sch=new Set();
+        doc.querySelectorAll('Cours').forEach(n=>{
+          const h=this.val(n,'H.DEBUT');if(h)sch.add(h);
+          raw.push({id:this.val(n,'NUMERO'),prof:`${this.val(n,'PROF_NOM')||''} ${this.val(n,'PROF_PRENOM')||''}`.trim(),
+            classeStr:this.val(n,'CLASSE')||'',jour:this.val(n,'JOUR')?.toLowerCase(),
+            heure:h,duree:this.val(n,'DUREE'),matiere:this.val(n,'MAT_LIBELLE'),salle:this.val(n,'SALLE')});
+        });
+        const bell=[...sch].filter(Boolean).sort();
+        raw.forEach(c=>{
+          let b=1;if(c.duree?.startsWith('2h'))b=2;if(c.duree?.startsWith('3h'))b=3;if(c.duree?.startsWith('4h'))b=4;
+          if(b===1){R.push(c);return;}
+          const idx=bell.indexOf(c.heure);
+          for(let i=0;i<b;i++)R.push({...c,id:`${c.id}_b${i+1}`,heure:(idx!==-1&&idx+i<bell.length)?bell[idx+i]:c.heure,duree:'1h00'});
+        });break;}
+      case 'ELEVE':
+        doc.querySelectorAll('Eleves').forEach(n=>R.push({id:this.val(n,'NUMERO'),nom:this.val(n,'NOM'),prenom:this.val(n,'PRENOM'),
+          primaryClasse:(this.val(n,'CLASSE')||'').split(',')[0].trim(),
+          groupes:(this.val(n,'GROUPES')||'').split(',').map(g=>g.trim()).filter(Boolean)}));break;
+      case 'PROF':
+        doc.querySelectorAll('Professeurs').forEach(n=>{const nom=this.val(n,'NOM')||'',prn=this.val(n,'PRENOM')||'';if(nom||prn)R.push({id:this.val(n,'NUMERO'),nom:`${nom} ${prn}`.trim()});});break;
+      case 'GROUPE':
+        doc.querySelectorAll('Groupes').forEach(n=>R.push({id:this.val(n,'NUMERO'),nom:this.val(n,'NOM')}));break;
+    }
+    return R;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ALGORITHM
+═══════════════════════════════════════════════════════════ */
+class Algorithm {
+  static parseTargets(s){
+    if(!s)return{classes:[],groupes:[]};
+    const classes=[],groupes=[];
+    s.split(',').map(p=>p.trim()).forEach(p=>{if(p.startsWith('[')&&p.endsWith(']'))groupes.push(p.slice(1,-1).trim());else classes.push(p);});
+    return{classes,groupes};
+  }
+  static getStudents(cours,eleves){
+    const t=this.parseTargets(cours.classeStr);
+    if(!t.classes.length&&!t.groupes.length)return[];
+    return eleves.filter(e=>t.classes.includes(e.primaryClasse)||t.groupes.some(g=>e.groupes.includes(g)));
+  }
+  static canceledStatus(cours,eleves,absSet){
+    const sts=this.getStudents(cours,eleves);
+    if(!sts.length)return{hasStudents:false,canceled:false,concernedClasses:[]};
+    return{hasStudents:true,canceled:sts.every(s=>absSet.has(s.primaryClasse)),
+      concernedClasses:[...new Set(sts.map(s=>s.primaryClasse).filter(Boolean))].sort()};
+  }
+  static canceledStatusFull(cours,eleves,absClasses,absGroupes){
+    const sts=this.getStudents(cours,eleves);
+    if(!sts.length)return{hasStudents:false,canceled:false,concernedClasses:[]};
+    // A student is absent if their classe is in absClasses OR they belong to any absGroupes group
+    const isAbsent=s=>absClasses.has(s.primaryClasse)||s.groupes.some(g=>absGroupes.has(g));
+    return{hasStudents:true,canceled:sts.every(s=>isAbsent(s)),
+      concernedClasses:[...new Set(sts.map(s=>s.primaryClasse).filter(Boolean))].sort()};
+  }
+  static getSlotType(cours,allDay){
+    const tg=this.parseTargets(cours.classeStr);
+    const thisStat=allDay.find(s=>s.id===cours.id);
+    if(!thisStat)return'mid';
+    const relC=new Set([...(thisStat.concernedClasses||[]),...tg.classes]);
+    if(!relC.size)return'mid';
+    const active=allDay.filter(s=>{
+      if(!s.hasStudents||s.isCanceled)return false;
+      const st=this.parseTargets(s.classeStr);
+      return(s.concernedClasses||[]).some(c=>relC.has(c))||st.classes.some(c=>relC.has(c));
+    }).map(s=>s.heure).filter(Boolean).sort();
+    if(!active.length)return'mid';
+    const isF=cours.heure===active[0],isL=cours.heure===active[active.length-1];
+    if(isF&&isL)return'both';if(isF)return'first';if(isL)return'last';return'mid';
+  }
+
+  /* Returns prof names that teach students in any of the given classes */
+  static profsForClasses(db, classNames){
+    if(!classNames.length)return new Set();
+    const classeSet=new Set(classNames);
+    const profs=new Set();
+    db.COURS.forEach(c=>{
+      if(!c.prof)return;
+      const tg=this.parseTargets(c.classeStr);
+      if(tg.classes.some(cl=>classeSet.has(cl))){profs.add(c.prof);return;}
+      // check via students
+      const sts=db.ELEVE.filter(e=>tg.classes.includes(e.primaryClasse)||tg.groupes.some(g=>e.groupes.includes(g)));
+      if(sts.some(e=>classeSet.has(e.primaryClasse)))profs.add(c.prof);
+    });
+    return profs;
+  }
+
+  /* Returns prof names for a combination of classes + groupes */
+  static profsForClassesOrGroups(db, classNames, groupeNames){
+    const classeSet=new Set(classNames),groupeSet=new Set(groupeNames);
+    if(!classeSet.size&&!groupeSet.size)return new Set();
+    const profs=new Set();
+    db.COURS.forEach(c=>{
+      if(!c.prof)return;
+      const tg=this.parseTargets(c.classeStr);
+      // direct class match
+      if(classeSet.size&&tg.classes.some(cl=>classeSet.has(cl))){profs.add(c.prof);return;}
+      // direct group match
+      if(groupeSet.size&&tg.groupes.some(g=>groupeSet.has(g))){profs.add(c.prof);return;}
+      // via students
+      const sts=this.getStudents(c,db.ELEVE);
+      if(sts.some(e=>classeSet.has(e.primaryClasse)||e.groupes.some(g=>groupeSet.has(g))))profs.add(c.prof);
+    });
+    return profs;
+  }
+
+  static calculate(db,days,absentClasses,absentTeachers,absentGroupes=[]){
+    const absC=new Set(absentClasses),absT=new Set(absentTeachers),absG=new Set(absentGroupes);
+    const targeted=db.COURS.filter(c=>days.includes(c.jour));
+    const statuses=targeted.map(c=>{
+      const isProfAbsent=absT.has(c.prof);
+      // Build a combined absSet for canceledStatus: students are absent if in absC (classes) OR absG (groupes)
+      const ss=this.canceledStatusFull(c,db.ELEVE,absC,absG);
+      const tg=this.parseTargets(c.classeStr);
+      let csp=c.classeStr;
+      if(tg.groupes.length&&ss.concernedClasses.length)csp=`${c.classeStr} (${ss.concernedClasses.join(', ')})`;
+      return{...c,classeStrPrecise:csp,isProfAbsent,isCanceled:ss.canceled,hasStudents:ss.hasStudents,
+        concernedClasses:ss.concernedClasses,needsReplacement:isProfAbsent&&!ss.canceled&&ss.hasStudents};
+    });
+    const need=statuses.filter(c=>c.needsReplacement);
+    const potSubs=statuses.filter(c=>c.isCanceled&&!c.isProfAbsent);
+    const results=need.map(c=>{
+      const eligible=potSubs.filter(s=>s.jour===c.jour&&s.heure===c.heure);
+      const substitutes=[...new Set(eligible.map(s=>s.prof))].sort();
+      const slotType=this.getSlotType(c,statuses);
+      const canDismiss=(slotType!=='mid');
+      const dismissLabel=slotType==='first'?'1er cours de la journée':slotType==='last'?'Dernier cours de la journée':slotType==='both'?'Unique cours de la journée':'';
+      return{coursSource:c,substitutes,slotType,canDismiss,dismissLabel};
+    });
+    const ord={lundi:1,mardi:2,mercredi:3,jeudi:4,vendredi:5,samedi:6,dimanche:7};
+    results.sort((a,b)=>{
+      const da=ord[a.coursSource.jour]??9,db2=ord[b.coursSource.jour]??9;
+      return da!==db2?da-db2:a.coursSource.heure.localeCompare(b.coursSource.heure);
+    });
+
+    /* Mark consecutive-block courses (same absent prof, same day, adjacent bell slots) */
+    // Build bell schedule from db
+    const bells=[...new Set(db.COURS.map(c=>c.heure).filter(Boolean))].sort();
+    for(let i=0;i<results.length-1;i++){
+      const A=results[i].coursSource,B=results[i+1].coursSource;
+      if(A.jour===B.jour&&A.prof===B.prof){
+        const idxA=bells.indexOf(A.heure),idxB=bells.indexOf(B.heure);
+        if(idxB===idxA+1){results[i].consecGroup=i;results[i+1].consecGroup=i;results[i].consecRole='first';results[i+1].consecRole='second';}
+      }
+    }
+    return results;
+  }
+
+  /* Greedy auto-assign with priority: mid > edge, most-constrained first.
+     For consecutive-block pairs: try to assign the same sub. */
+  static autoAssign(results){
+    const used={},key=(j,h)=>`${j}||${h}`;
+    const assignments=results.map(()=>({prof:null,dismiss:false}));
+
+    // Process consecutive pairs first as a unit
+    const consecHandled=new Set();
+    results.forEach((r,i)=>{
+      if(r.consecRole!=='first')return;
+      const j=i+1;
+      if(j>=results.length||results[j].consecRole!=='second')return;
+      consecHandled.add(i);consecHandled.add(j);
+      const rA=results[i],rB=results[j];
+      const kA=key(rA.coursSource.jour,rA.coursSource.heure);
+      const kB=key(rB.coursSource.jour,rB.coursSource.heure);
+      if(!used[kA])used[kA]=[];if(!used[kB])used[kB]=[];
+      // Find a sub available in BOTH slots
+      const common=rA.substitutes.filter(p=>rB.substitutes.includes(p)&&!used[kA].includes(p)&&!used[kB].includes(p));
+      if(common.length){
+        assignments[i].prof=common[0];assignments[j].prof=common[0];
+        used[kA].push(common[0]);used[kB].push(common[0]);
+      } else {
+        // Assign separately
+        const subA=rA.substitutes.find(p=>!used[kA].includes(p));
+        if(subA){assignments[i].prof=subA;used[kA].push(subA);}
+        const subB=rB.substitutes.find(p=>!used[kB].includes(p));
+        if(subB){assignments[j].prof=subB;used[kB].push(subB);}
+      }
+    });
+
+    // Then handle remaining (non-consecutive) with priority: mid first, then edge
+    const remaining=[...results.keys()].filter(i=>!consecHandled.has(i));
+    const midIdx=remaining.filter(i=>results[i].slotType==='mid'&&results[i].substitutes.length>0);
+    const edgeIdx=remaining.filter(i=>results[i].slotType!=='mid'&&results[i].substitutes.length>0);
+    const byConstraint=(a,b)=>results[a].substitutes.length-results[b].substitutes.length;
+    [...midIdx.sort(byConstraint),...edgeIdx.sort(byConstraint)].forEach(i=>{
+      const r=results[i];
+      const k=key(r.coursSource.jour,r.coursSource.heure);
+      if(!used[k])used[k]=[];
+      const chosen=r.substitutes.find(p=>!used[k].includes(p));
+      if(chosen){assignments[i].prof=chosen;used[k].push(chosen);}
+    });
+
+    // Edge with no sub → suggest dismiss
+    results.forEach((r,i)=>{if(r.canDismiss&&!assignments[i].prof)assignments[i].dismiss=true;});
+    return assignments;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INDEXEDDB
+═══════════════════════════════════════════════════════════ */
+const DB_NAME='PlanR_v5',STORE='schoolData';
+function getDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,1);r.onupgradeneeded=e=>e.target.result.createObjectStore(STORE);r.onsuccess=e=>res(e.target.result);r.onerror=rej;});}
+async function saveToDB(k,v){const db=await getDB();return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(v,k);tx.oncomplete=res;tx.onerror=rej;});}
+async function loadFromDB(k){const db=await getDB();return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readonly');const r=tx.objectStore(STORE).get(k);r.onsuccess=()=>res(r.result);r.onerror=rej;});}
+async function clearDB(){const db=await getDB();return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).clear();tx.oncomplete=res;tx.onerror=rej;});}
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════ */
+let schoolData={CLASSE:null,COURS:null,ELEVE:null,GROUPE:null,PROF:null};
+const REQUIRED=['CLASSE','COURS','ELEVE','GROUPE','PROF'];
+let selectedClasses=new Set(),selectedTeachers=new Set();
+let configBuilt=false;
+let groupMode='full'; // 'full' | 'groups'
+let selectedGroupIds=new Set(); // groupe noms sélectionnés en mode 'groups'
+const CHIP_LABELS={CLASSE:'Classes',COURS:'Cours',ELEVE:'Élèves',GROUPE:'Groupes',PROF:'Professeurs'};
+// day -> date string (YYYY-MM-DD)
+let dayDates={};
+
+/* ═══════════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════════ */
+function goToPage(n){
+  if(n===2&&!REQUIRED.every(k=>schoolData[k]))return;
+  if(n===3&&!window.currentResults)return;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(`page-${n}`).classList.add('active');
+  for(let i=1;i<=3;i++){const s=document.getElementById(`step-${i}`);s.className='step'+(i<n?' done':i===n?' active':'');}
+  if(n===2&&!configBuilt)buildConfig();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════ */
+async function init(){
+  for(const k of REQUIRED){try{const d=await loadFromDB(`EXP_${k}`);if(d){schoolData[k]=d;updateChip(k,true);}}catch{}}
+  checkImportDone();
+  const dz=document.getElementById('dropzone');
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover');});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));
+  dz.addEventListener('drop',async e=>{e.preventDefault();dz.classList.remove('dragover');await handleFiles(e.dataTransfer.files);});
+  document.getElementById('file-input').addEventListener('change',e=>handleFiles(e.target.files));
+  document.getElementById('btn-reset').addEventListener('click',async()=>{try{await clearDB();}catch{}location.reload();});
+  document.getElementById('btn-to-step2').addEventListener('click',()=>goToPage(2));
+  document.getElementById('btn-calculate').addEventListener('click',runCalc);
+  document.getElementById('btn-autoassign').addEventListener('click',runAutoAssign);
+  document.getElementById('btn-print').addEventListener('click',doPrint);
+  document.getElementById('btn-csv').addEventListener('click',doCSV);
+  document.getElementById('classes-search').addEventListener('input',e=>filterList('classes-list',e.target.value));
+  document.getElementById('teachers-search').addEventListener('input',e=>filterBothTeacherLists(e.target.value));
+  document.querySelectorAll('.step[data-page]').forEach(s=>s.addEventListener('click',()=>goToPage(parseInt(s.dataset.page))));
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FILES
+═══════════════════════════════════════════════════════════ */
+async function handleFiles(files){
+  for(const f of files){
+    const name=f.name.toUpperCase().replace('.XML','');
+    let type=null;
+    if(name.includes('EXP_CLASSE'))type='CLASSE';
+    else if(name.includes('EXP_COURS'))type='COURS';
+    else if(name.includes('EXP_ELEVE'))type='ELEVE';
+    else if(name.includes('EXP_GROUPE'))type='GROUPE';
+    else if(name.includes('EXP_PROFESSEUR'))type='PROF';
+    if(!type)continue;
+    try{const parsed=await XMLParser.parseFile(f,type);schoolData[type]=parsed;await saveToDB(`EXP_${type}`,parsed);updateChip(type,true);}
+    catch(err){console.error(err);alert(`Erreur: ${f.name}`);}
+  }
+  checkImportDone();
+}
+function checkImportDone(){
+  const loaded=REQUIRED.filter(k=>schoolData[k]).length,all=loaded===REQUIRED.length;
+  document.getElementById('btn-to-step2').disabled=!all;
+  const h=document.getElementById('import-hint');
+  if(all){h.textContent='✓ Tous les fichiers chargés — continuez.';h.style.color='var(--green)';}
+  else{h.textContent=`${loaded} / ${REQUIRED.length} fichiers chargés.`;h.style.color='var(--t3)';}
+}
+function updateChip(type,ok){
+  const el=document.getElementById(`status-${type}`);if(!el||!ok)return;
+  el.classList.add('ok');
+  el.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>${CHIP_LABELS[type]}`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════════════════ */
+function buildConfig(){
+  configBuilt=true;
+  // Reset group selection state when rebuilding
+  groupMode='full';
+  selectedGroupIds.clear();
+  document.getElementById('mode-full').classList.add('active');
+  document.getElementById('mode-groups').classList.remove('active');
+  document.getElementById('groups-panel').classList.add('hidden');
+
+  buildList('classes-list',schoolData.CLASSE.map(c=>c.nom).sort(),selectedClasses,'classes-count');
+  buildTeacherLists();
+  // Days → dates
+  document.querySelectorAll('.day-pill input').forEach(inp=>{
+    inp.addEventListener('change',()=>{
+      const any=[...document.querySelectorAll('.day-pill input:checked')].length>0;
+      document.getElementById('btn-calculate').disabled=!any;
+      rebuildDateRow();
+    });
+  });
+}
+
+function rebuildDateRow(){
+  const dateRow=document.getElementById('date-row');dateRow.innerHTML='';
+  const checked=[...document.querySelectorAll('.day-pill input:checked')];
+  if(!checked.length){dateRow.style.display='none';return;}
+  dateRow.style.display='flex';
+  checked.forEach(inp=>{
+    const day=inp.value;
+    const pair=document.createElement('div');pair.className='date-pair';
+    const lbl=document.createElement('label');lbl.textContent=cap(day);lbl.htmlFor=`date-${day}`;
+    const inp2=document.createElement('input');inp2.type='date';inp2.id=`date-${day}`;inp2.className='date-inp';
+    if(dayDates[day])inp2.value=dayDates[day];
+    inp2.addEventListener('change',()=>{dayDates[day]=inp2.value||null;});
+    pair.appendChild(lbl);pair.appendChild(inp2);dateRow.appendChild(pair);
+  });
+}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+
+function buildTeacherLists(){
+  const allProfs=[...new Set(schoolData.PROF.map(p=>p.nom))].sort();
+  const eff=getEffectiveAbsences();
+  const relatedProfs=Algorithm.profsForClassesOrGroups(schoolData,eff.classes,eff.groupes);
+  const relDiv=document.getElementById('teachers-related');
+  const othDiv=document.getElementById('teachers-others');
+  relDiv.innerHTML='';othDiv.innerHTML='';
+  let relN=0;
+  allProfs.forEach(p=>{
+    if(relatedProfs.has(p)){relN++;addProfItem(relDiv,p);}
+    else addProfItem(othDiv,p);
+  });
+  if(relN===0){relDiv.innerHTML='<div class="li" style="color:var(--t3);font-size:.75rem;font-style:italic;cursor:default">Aucun prof lié à la sélection.</div>';}
+  document.getElementById('rel-count').textContent=relN;
+  document.getElementById('teachers-count').textContent=selectedTeachers.size;
+}
+
+function addProfItem(container,name){
+  const d=document.createElement('div');d.className='li';
+  const sid=`tp-${name.replace(/[^a-zA-Z0-9]/g,'_')}`;
+  d.innerHTML=`<input type="checkbox" id="${sid}" value="${name}" ${selectedTeachers.has(name)?'checked':''}><label for="${sid}">${name}</label>`;
+  d.querySelector('input').addEventListener('change',e=>{
+    e.target.checked?selectedTeachers.add(name):selectedTeachers.delete(name);
+    document.getElementById('teachers-count').textContent=selectedTeachers.size;
+  });
+  container.appendChild(d);
+}
+
+function buildList(id,items,set,countId){
+  const c=document.getElementById(id);c.innerHTML='';
+  items.forEach(item=>{
+    const d=document.createElement('div');d.className='li';
+    const sid=`${id}-${item.replace(/[^a-zA-Z0-9]/g,'_')}`;
+    d.innerHTML=`<input type="checkbox" id="${sid}" value="${item}"><label for="${sid}">${item}</label>`;
+    d.querySelector('input').addEventListener('change',e=>{
+      e.target.checked?set.add(item):set.delete(item);
+      document.getElementById(countId).textContent=set.size;
+      // Rebuild teacher lists when classes change
+      if(id==='classes-list'){updateGroupsPanel();buildTeacherLists();}
+    });
+    c.appendChild(d);
+  });
+}
+
+function filterList(id,q){
+  q=q.toLowerCase();
+  document.getElementById(id).querySelectorAll('.li').forEach(d=>{d.style.display=d.textContent.toLowerCase().includes(q)?'flex':'none';});
+}
+function filterBothTeacherLists(q){
+  q=q.toLowerCase();
+  ['teachers-related','teachers-others'].forEach(id=>{
+    document.getElementById(id).querySelectorAll('.li').forEach(d=>{d.style.display=d.textContent.toLowerCase().includes(q)?'flex':'none';});
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GROUPS PANEL
+═══════════════════════════════════════════════════════════ */
+function updateGroupsPanel(){
+  const panel=document.getElementById('groups-panel');
+  const grid=document.getElementById('groups-grid');
+  const infoText=document.getElementById('groups-info-text');
+  const hintText=document.getElementById('groups-hint-text');
+
+  if(!selectedClasses.size){panel.classList.add('hidden');return;}
+
+  // Find all groupes that contain students from the selected classes
+  const classSet=new Set(selectedClasses);
+  // Map: groupNom -> Set of classe noms that are in this group AND in classSet
+  const groupMap=new Map();
+  (schoolData.ELEVE||[]).forEach(e=>{
+    if(!classSet.has(e.primaryClasse))return;
+    e.groupes.forEach(g=>{
+      if(!g)return;
+      if(!groupMap.has(g))groupMap.set(g,new Set());
+      groupMap.get(g).add(e.primaryClasse);
+    });
+  });
+
+  // Update info text
+  const nbGroups=groupMap.size;
+  infoText.textContent=nbGroups>0?`${nbGroups} groupe${nbGroups>1?'s':''} concerné${nbGroups>1?'s':''}`:'Aucun groupe';
+
+  // Show panel
+  panel.classList.remove('hidden');
+
+  if(nbGroups===0){
+    grid.classList.add('hidden');
+    hintText.textContent='Aucun groupe contenant des élèves de ces classes n\'a été trouvé.';
+    return;
+  }
+
+  // Build grid
+  grid.innerHTML='';
+  const sortedGroups=[...groupMap.entries()].sort((a,b)=>a[0].localeCompare(b[0],'fr'));
+
+  sortedGroups.forEach(([gNom,classes])=>{
+    const item=document.createElement('div');
+    item.className='group-item'+(selectedGroupIds.has(gNom)?' selected':'');
+    const classesStr=[...classes].sort().join(', ');
+    const cbId=`grp-${gNom.replace(/[^a-zA-Z0-9]/g,'_')}`;
+    item.innerHTML=`<input type="checkbox" id="${cbId}" ${selectedGroupIds.has(gNom)?'checked':''}><div style="min-width:0;flex:1"><div class="group-item-name">${gNom}</div><div class="group-item-classes">${classesStr}</div></div>`;
+    const chk=item.querySelector('input');
+    const toggle=()=>{
+      chk.checked?selectedGroupIds.add(gNom):selectedGroupIds.delete(gNom);
+      item.classList.toggle('selected',chk.checked);
+      updateGroupsHint(nbGroups);
+    };
+    chk.addEventListener('change',toggle);
+    item.addEventListener('click',e=>{if(e.target!==chk){chk.checked=!chk.checked;toggle();}});
+    grid.appendChild(item);
+  });
+
+  updateGroupsHint(nbGroups);
+  applyGroupMode();
+}
+
+function applyGroupMode(){
+  const grid=document.getElementById('groups-grid');
+  if(groupMode==='full'){
+    grid.classList.add('hidden');
+    // Reset group selections
+    selectedGroupIds.clear();
+    grid.querySelectorAll('input[type="checkbox"]').forEach(c=>{c.checked=false;c.closest('.group-item').classList.remove('selected');});
+  } else {
+    grid.classList.remove('hidden');
+  }
+}
+
+function setGroupMode(mode){
+  groupMode=mode;
+  document.getElementById('mode-full').classList.toggle('active',mode==='full');
+  document.getElementById('mode-groups').classList.toggle('active',mode==='groups');
+  applyGroupMode();
+  updateGroupsHint(document.getElementById('groups-grid').children.length);
+  buildTeacherLists();
+}
+
+function updateGroupsHint(nbGroups){
+  const hintText=document.getElementById('groups-hint-text');
+  if(groupMode==='full'){
+    hintText.textContent='Toutes les classes complètes sont concernées. Choisissez « Groupes spécifiques » pour cibler certains groupes.';
+  } else {
+    const sel=selectedGroupIds.size;
+    if(sel===0){hintText.textContent='Sélectionnez un ou plusieurs groupes dans la liste ci-dessus.';}
+    else{hintText.textContent=`${sel} groupe${sel>1?'s':''} sélectionné${sel>1?'s':''} — seuls les cours de ces groupes seront concernés.`;}
+  }
+}
+
+/* Returns {classes, groupes} to pass to Algorithm.calculate */
+function getEffectiveAbsences(){
+  if(groupMode==='full'||selectedGroupIds.size===0){
+    return{classes:[...selectedClasses],groupes:[]};
+  }
+  return{classes:[],groupes:[...selectedGroupIds]};
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CALC
+═══════════════════════════════════════════════════════════ */
+function runCalc(){
+  const days=[...document.querySelectorAll('.day-pill input:checked')].map(el=>el.value);
+  if(!days.length){alert('Sélectionnez au moins un jour.');return;}
+  const eff=getEffectiveAbsences();
+  window.currentResults=Algorithm.calculate(schoolData,days,eff.classes,[...selectedTeachers],eff.groupes);
+  renderResults(window.currentResults);
+  goToPage(3);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AUTO-ASSIGN
+═══════════════════════════════════════════════════════════ */
+function runAutoAssign(){
+  if(!window.currentResults?.length)return;
+  const asgns=Algorithm.autoAssign(window.currentResults);
+  asgns.forEach((a,i)=>{
+    const sel=document.getElementById(`sel-${i}`);
+    const chkN=document.getElementById(`chk-nosub-${i}`);
+    const chkD=document.getElementById(`chk-dismiss-${i}`);
+    const card=document.getElementById(`card-${i}`);
+    if(!sel)return;
+    if(chkN?.checked||chkD?.checked)return;
+    if(a.dismiss&&chkD){
+      chkD.checked=true;sel.value='';sel.disabled=true;sel.classList.remove('assigned');
+      card?.classList.add('dismiss-on');card?.classList.remove('nosub-on');
+    } else if(a.prof){
+      if(chkD)chkD.checked=false;sel.disabled=false;sel.value=a.prof;sel.classList.add('assigned');
+      card?.classList.remove('dismiss-on','nosub-on');
+    }
+    syncPrint(i);
+  });
+  refreshConflicts();updateProgress();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════════════════════ */
+const DAY_FR={lundi:'Lundi',mardi:'Mardi',mercredi:'Mercredi',jeudi:'Jeudi',vendredi:'Vendredi',samedi:'Samedi',dimanche:'Dimanche'};
+
+function renderResults(results){
+  const cont=document.getElementById('results-content');
+  cont.innerHTML='';
+  if(!results.length){
+    cont.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>Aucun remplacement nécessaire.</p></div>`;
+    updateProgress();return;
+  }
+
+  /* Group by (day, hour) for time-slot separators */
+  let currentKey=null;let currentGroup=null;let animIdx=0;
+  results.forEach((res,i)=>{
+    const c=res.coursSource;
+    const gKey=`${c.jour}||${c.heure}`;
+    if(gKey!==currentKey){
+      currentKey=gKey;
+      currentGroup=document.createElement('div');currentGroup.className='time-group';
+      const th=document.createElement('div');th.className='time-header';
+      const dateStr=dayDates[c.jour]?` — ${fmtDate(dayDates[c.jour])}`:'';
+      th.innerHTML=`
+        <svg style="width:14px;height:14px;color:var(--amber);flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span class="time-header-time">${c.heure}</span>
+        <span class="time-header-count" id="grp-count-${gKey.replace('||','_')}"></span>
+        <span class="time-header-day">${DAY_FR[c.jour]||c.jour.toUpperCase()}${dateStr}</span>`;
+      currentGroup.appendChild(th);
+      cont.appendChild(currentGroup);
+    }
+
+    const hasOpts=res.substitutes.length>0;
+    let opts=`<option value="">— Choisir un remplaçant —</option>`;
+    if(hasOpts)res.substitutes.forEach(s=>{opts+=`<option value="${s}">${s}</option>`;});
+    else opts=`<option value="" disabled selected>Aucun prof disponible</option>`;
+
+    const isEdge=res.canDismiss;
+    const isConsec=res.consecRole!==undefined;
+    const edgeHtml=isEdge?`<span class="ebadge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${res.dismissLabel}</span>`:'';
+    const consecHtml=isConsec?`<span class="consec-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Cours consécutif</span>`:'';
+
+    const card=document.createElement('div');
+    card.id=`card-${i}`;
+    card.className=`rcard ${isEdge?'slot-edge':'slot-mid'}`;
+    card.style.animationDelay=`${animIdx++*0.025}s`;
+    card.innerHTML=`
+      <div class="cl">
+        <div class="ctitle">
+          <span class="subj">${c.matiere}</span> — ${c.prof}
+          <span class="abadge">Absent</span>${edgeHtml}${consecHtml}
+        </div>
+        <div class="cmeta">
+          <span class="mb mb-time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${c.heure}</span>
+          <span class="mb mb-class">${c.classeStrPrecise||c.classeStr}</span>
+          <span class="mb mb-room">Salle ${c.salle}</span>
+        </div>
+      </div>
+      <div class="cr">
+        <div class="sw">
+          <select class="tsel" id="sel-${i}" data-jour="${c.jour}" data-heure="${c.heure}" ${!hasOpts?'disabled':''}>${opts}</select>
+          <svg class="sarr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="actions">
+          <div class="arow">
+            <input type="checkbox" class="achk p" id="chk-dismiss-${i}">
+            <label class="albl p" for="chk-dismiss-${i}">Licencier les élèves</label>
+          </div>
+          <div class="arow">
+            <input type="checkbox" class="achk r" id="chk-nosub-${i}">
+            <label class="albl r" for="chk-nosub-${i}">Aucun remplaçant disponible</label>
+          </div>
+        </div>
+      </div>`;
+    currentGroup.appendChild(card);
+  });
+
+  buildPrintTable(results);
+  wireEvents(results);
+  updateProgress();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   WIRE EVENTS
+═══════════════════════════════════════════════════════════ */
+function wireEvents(results){
+  results.forEach((res,i)=>{
+    const sel=document.getElementById(`sel-${i}`);
+    const chkN=document.getElementById(`chk-nosub-${i}`);
+    const chkD=document.getElementById(`chk-dismiss-${i}`);
+    const card=document.getElementById(`card-${i}`);
+    sel?.addEventListener('change',()=>{
+      if(chkN)chkN.checked=false;if(chkD)chkD.checked=false;
+      card?.classList.remove('nosub-on','dismiss-on');
+      sel.classList.toggle('assigned',!!sel.value);sel.disabled=false;
+      syncPrint(i);refreshConflicts();updateProgress();
+    });
+    chkD?.addEventListener('change',()=>{
+      if(chkD.checked){if(sel){sel.value='';sel.disabled=true;sel.classList.remove('assigned');}if(chkN)chkN.checked=false;card?.classList.add('dismiss-on');card?.classList.remove('nosub-on');}
+      else{if(sel)sel.disabled=!res.substitutes.length;card?.classList.remove('dismiss-on');}
+      syncPrint(i);refreshConflicts();updateProgress();
+    });
+    chkN?.addEventListener('change',()=>{
+      if(chkN.checked){if(sel){sel.value='';sel.disabled=true;sel.classList.remove('assigned');}if(chkD)chkD.checked=false;card?.classList.add('nosub-on');card?.classList.remove('dismiss-on');}
+      else{if(sel)sel.disabled=!res.substitutes.length;card?.classList.remove('nosub-on');}
+      syncPrint(i);refreshConflicts();updateProgress();
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PRINT TABLE
+═══════════════════════════════════════════════════════════ */
+function buildPrintTable(results){
+  const sec=document.getElementById('print-section');
+  let html=`<div class="print-meta">Plan R — généré le ${new Date().toLocaleDateString('fr-BE',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>
+  <table class="ptable"><thead><tr><th>Jour</th><th>Date</th><th>Heure</th><th>Classe</th><th>Matière</th><th>Prof absent</th><th>Salle</th><th>Décision</th></tr></thead><tbody>`;
+  results.forEach((res,i)=>{
+    const c=res.coursSource;
+    const dateStr=dayDates[c.jour]?fmtDate(dayDates[c.jour]):'—';
+    html+=`<tr id="ptr-${i}"><td>${DAY_FR[c.jour]||''}</td><td>${dateStr}</td><td>${c.heure}</td><td>${c.classeStrPrecise||c.classeStr}</td><td>${c.matiere}</td><td>${c.prof}</td><td>${c.salle}</td><td id="pr-${i}">NON ASSIGNÉ</td></tr>`;
+  });
+  html+=`</tbody></table>`;
+  sec.innerHTML=html;
+}
+
+function fmtDate(d){
+  if(!d)return'—';
+  try{const dt=new Date(d);return dt.toLocaleDateString('fr-BE',{weekday:'short',day:'numeric',month:'short',year:'numeric'});}
+  catch{return d;}
+}
+
+function syncPrint(i){
+  const sel=document.getElementById(`sel-${i}`);
+  const chkN=document.getElementById(`chk-nosub-${i}`);
+  const chkD=document.getElementById(`chk-dismiss-${i}`);
+  const cell=document.getElementById(`pr-${i}`);
+  const row=document.getElementById(`ptr-${i}`);
+  if(!cell)return;
+  row?.classList.remove('row-assigned','row-dismiss','row-nosub','row-pending');
+  if(chkD?.checked){cell.textContent='ÉLÈVES LICENCIÉS';row?.classList.add('row-dismiss');}
+  else if(chkN?.checked){cell.textContent='AUCUN DISPONIBLE';row?.classList.add('row-nosub');}
+  else if(sel?.value){cell.textContent=sel.value;row?.classList.add('row-assigned');}
+  else{cell.textContent='NON ASSIGNÉ';row?.classList.add('row-pending');}
+}
+
+function refreshConflicts(){
+  if(!window.currentResults)return;
+  const slotMap={};
+  window.currentResults.forEach((_,i)=>{
+    const sel=document.getElementById(`sel-${i}`);
+    const chkN=document.getElementById(`chk-nosub-${i}`);
+    const chkD=document.getElementById(`chk-dismiss-${i}`);
+    if(!sel||chkN?.checked||chkD?.checked||!sel.value)return;
+    const k=`${sel.dataset.jour}||${sel.dataset.heure}`;
+    if(!slotMap[k])slotMap[k]=[];slotMap[k].push({idx:i,val:sel.value});
+  });
+  window.currentResults.forEach((_,i)=>{
+    const sel=document.getElementById(`sel-${i}`);
+    const chkN=document.getElementById(`chk-nosub-${i}`);
+    const chkD=document.getElementById(`chk-dismiss-${i}`);
+    if(!sel||chkN?.checked||chkD?.checked)return;
+    const k=`${sel.dataset.jour}||${sel.dataset.heure}`;
+    const taken=(slotMap[k]||[]).filter(e=>e.idx!==i).map(e=>e.val);
+    [...sel.options].forEach(opt=>{
+      if(!opt.value)return;
+      opt.disabled=taken.includes(opt.value);
+      opt.text=opt.disabled?`${opt.value} (Déjà assigné)`:opt.value;
+    });
+  });
+}
+
+function updateProgress(){
+  const total=window.currentResults?.length??0;
+  let assigned=0,noSub=0,dismiss=0;
+  for(let i=0;i<total;i++){
+    const chkN=document.getElementById(`chk-nosub-${i}`);
+    const chkD=document.getElementById(`chk-dismiss-${i}`);
+    const sel=document.getElementById(`sel-${i}`);
+    if(chkD?.checked)dismiss++;else if(chkN?.checked)noSub++;else if(sel?.value)assigned++;
+  }
+  const pending=total-assigned-noSub-dismiss;
+  document.getElementById('st-total').textContent=total;
+  document.getElementById('st-assigned').textContent=assigned;
+  document.getElementById('st-pending').textContent=pending;
+  document.getElementById('st-dismiss').textContent=dismiss;
+  document.getElementById('st-nosub').textContent=noSub;
+  const pct=total>0?((assigned+noSub+dismiss)/total)*100:0;
+  document.getElementById('prog-fill').style.width=`${pct}%`;
+  document.getElementById('prog-lbl').textContent=`${assigned+noSub+dismiss} / ${total}`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PRINT & CSV
+═══════════════════════════════════════════════════════════ */
+function doPrint(){
+  if(!window.currentResults?.length){alert('Aucun résultat à imprimer.');return;}
+  for(let i=0;i<window.currentResults.length;i++)syncPrint(i);
+  window.print();
+}
+
+function doCSV(){
+  if(!window.currentResults?.length){alert('Aucun résultat à exporter.');return;}
+  const BOM='\uFEFF';
+  const hdr='Jour;Date;Heure;Classe;Matière;Prof_Absent;Salle;Décision;Statut\n';
+  const rows=window.currentResults.map((res,i)=>{
+    const c=res.coursSource;
+    const chkN=document.getElementById(`chk-nosub-${i}`);
+    const chkD=document.getElementById(`chk-dismiss-${i}`);
+    const sel=document.getElementById(`sel-${i}`);
+    let decision,statut;
+    if(chkD?.checked){decision='ÉLÈVES LICENCIÉS';statut='Licenciés';}
+    else if(chkN?.checked){decision='AUCUN DISPONIBLE';statut='Aucun disponible';}
+    else if(sel?.value){decision=sel.value;statut='Assigné';}
+    else{decision='NON ASSIGNÉ';statut='En attente';}
+    const dateStr=dayDates[c.jour]?fmtDate(dayDates[c.jour]):'—';
+    return[(DAY_FR[c.jour]||'').toUpperCase(),dateStr,c.heure||'',
+      c.classeStrPrecise||c.classeStr||'',c.matiere||'',c.prof||'',c.salle||'',decision,statut
+    ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';');
+  });
+  const csv=BOM+hdr+rows.join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`planr_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},150);
+}
+
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
